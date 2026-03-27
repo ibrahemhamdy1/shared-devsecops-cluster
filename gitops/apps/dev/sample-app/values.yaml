@@ -1,0 +1,49 @@
+# =============================================================================
+# Sample Application - Dev Environment Values
+# =============================================================================
+# Layer 3: App-specific overrides for dev
+# Merge order: chart defaults → dev common → this file
+# =============================================================================
+
+image:
+  # -- Replace ACCOUNT_ID with your AWS account ID
+  repository: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/sample-app
+  # -- Dev uses latest for rapid iteration (pinned tags in staging/prod)
+  tag: "latest"
+  pullPolicy: Always
+
+replicaCount: 1
+
+# -- Ingress for dev sample app
+ingress:
+  enabled: true
+  className: alb
+  hosts:
+    - host: sample-app.dev.internal.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+# -- Dev environment variables
+env:
+  - name: LOG_LEVEL
+    value: "debug"
+  - name: ENVIRONMENT
+    value: "dev"
+  - name: ENABLE_DEBUG_ENDPOINTS
+    value: "true"
+
+# -- Dev-specific config
+configMap:
+  enabled: true
+  data:
+    app.conf: |
+      environment=dev
+      debug=true
+      log_format=json
+
+# -- ServiceAccount (for Pod Identity / IRSA)
+serviceAccount:
+  create: true
+  annotations: {}
+  # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/sample-app-dev

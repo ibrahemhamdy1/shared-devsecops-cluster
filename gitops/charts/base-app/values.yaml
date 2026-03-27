@@ -1,0 +1,213 @@
+# =============================================================================
+# Base Application Helm Chart - Default Values
+# =============================================================================
+# These are the default values for the base-app chart.
+# Override these in environment-specific and app-specific values files.
+# =============================================================================
+
+# -- Container image configuration
+image:
+  # -- Container image repository
+  repository: ""
+  # -- Container image tag (defaults to chart appVersion)
+  tag: ""
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+
+# -- Number of pod replicas
+replicaCount: 2
+
+# -- Kubernetes Service configuration
+service:
+  # -- Service type (ClusterIP, NodePort, LoadBalancer)
+  type: ClusterIP
+  # -- Service port
+  port: 80
+  # -- Container target port
+  targetPort: 8080
+
+# -- Ingress configuration
+ingress:
+  # -- Enable ingress resource creation
+  enabled: false
+  # -- Ingress class name
+  className: alb
+  # -- Ingress annotations (ALB-specific defaults)
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+  # -- Ingress host rules
+  hosts:
+    - host: app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- TLS configuration
+  tls: []
+  #  - secretName: app-tls
+  #    hosts:
+  #      - app.example.com
+
+# -- Container resource requests and limits
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "250m"
+
+# -- Horizontal Pod Autoscaler configuration
+autoscaling:
+  # -- Enable HPA
+  enabled: false
+  # -- Minimum number of replicas
+  minReplicas: 2
+  # -- Maximum number of replicas
+  maxReplicas: 10
+  # -- Target CPU utilization percentage
+  targetCPUUtilizationPercentage: 80
+
+# -- Health check configuration
+healthcheck:
+  liveness:
+    # -- Liveness probe HTTP path
+    path: /healthz
+    # -- Liveness probe port
+    port: 8080
+    # -- Initial delay before liveness probe starts (seconds)
+    initialDelaySeconds: 30
+    # -- Period between liveness probes (seconds)
+    periodSeconds: 10
+    # -- Timeout for liveness probe (seconds)
+    timeoutSeconds: 5
+    # -- Number of consecutive failures before marking unhealthy
+    failureThreshold: 3
+    # -- Number of consecutive successes to mark healthy after failure
+    successThreshold: 1
+  readiness:
+    # -- Readiness probe HTTP path
+    path: /ready
+    # -- Readiness probe port
+    port: 8080
+    # -- Initial delay before readiness probe starts (seconds)
+    initialDelaySeconds: 10
+    # -- Period between readiness probes (seconds)
+    periodSeconds: 5
+    # -- Timeout for readiness probe (seconds)
+    timeoutSeconds: 3
+    # -- Number of consecutive failures before marking not ready
+    failureThreshold: 3
+    # -- Number of consecutive successes to mark ready
+    successThreshold: 1
+
+# -- Environment variables for the container
+# Example:
+#   - name: LOG_LEVEL
+#     value: info
+#   - name: DB_HOST
+#     valueFrom:
+#       secretKeyRef:
+#         name: db-secret
+#         key: host
+env: []
+
+# -- Environment variable sources (ConfigMaps/Secrets)
+# Example:
+#   - configMapRef:
+#       name: app-config
+#   - secretRef:
+#       name: app-secrets
+envFrom: []
+
+# -- ConfigMap configuration
+configMap:
+  # -- Enable ConfigMap creation
+  enabled: false
+  # -- ConfigMap data (key-value pairs)
+  data: {}
+  #   config.yaml: |
+  #     key: value
+  #   settings.json: |
+  #     {"key": "value"}
+
+# -- Secrets configuration
+# NOTE: For production, prefer External Secrets Operator over storing secrets in Git
+secrets:
+  # -- Enable Secret creation
+  enabled: false
+  # -- Secret data (key-value pairs, will be base64 encoded)
+  data: {}
+  #   api-key: my-secret-key
+  #   db-password: my-db-password
+
+# -- ServiceAccount configuration
+serviceAccount:
+  # -- Enable ServiceAccount creation
+  create: true
+  # -- ServiceAccount annotations (e.g., for IAM Roles for Service Accounts)
+  annotations: {}
+  #   eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/my-role
+
+# -- Pod Disruption Budget configuration
+podDisruptionBudget:
+  # -- Enable PDB creation
+  enabled: false
+  # -- Minimum number of pods that must be available
+  minAvailable: 1
+
+# -- Node selector for pod scheduling
+nodeSelector: {}
+#   environment: production
+#   node-type: application
+
+# -- Tolerations for pod scheduling
+tolerations: []
+#   - key: "dedicated"
+#     operator: "Equal"
+#     value: "application"
+#     effect: "NoSchedule"
+
+# -- Affinity rules for pod scheduling
+affinity: {}
+#   podAntiAffinity:
+#     preferredDuringSchedulingIgnoredDuringExecution:
+#       - weight: 100
+#         podAffinityTerm:
+#           labelSelector:
+#             matchExpressions:
+#               - key: app.kubernetes.io/name
+#                 operator: In
+#                 values:
+#                   - my-app
+#           topologyKey: kubernetes.io/hostname
+
+# -- Additional pod annotations
+podAnnotations: {}
+#   prometheus.io/scrape: "true"
+#   prometheus.io/port: "8080"
+
+# -- Additional pod labels
+podLabels: {}
+#   team: backend
+#   cost-center: engineering
+
+# -- Additional volumes
+volumes: []
+#   - name: config-volume
+#     configMap:
+#       name: my-config
+#   - name: secret-volume
+#     secret:
+#       secretName: my-secret
+
+# -- Additional volume mounts
+volumeMounts: []
+#   - name: config-volume
+#     mountPath: /etc/config
+#     readOnly: true
+#   - name: secret-volume
+#     mountPath: /etc/secrets
+#     readOnly: true

@@ -1,0 +1,45 @@
+# =============================================================================
+# Staging Environment - Common Values
+# =============================================================================
+# These values apply to ALL applications deployed in the staging environment.
+# App-specific overrides go in gitops/apps/staging/{app-name}/values.yaml
+# =============================================================================
+
+# -- Standard replicas for staging (mirrors production topology)
+replicaCount: 2
+
+# -- Moderate resources for staging workloads
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "250m"
+
+# -- Autoscaling disabled in staging (test with fixed replicas)
+autoscaling:
+  enabled: false
+
+# -- No PDB in staging by default
+podDisruptionBudget:
+  enabled: false
+
+# -- Ingress defaults for staging environment
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/group.name: staging-apps
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+
+# -- Node selector (uncomment to pin staging workloads)
+# nodeSelector:
+#   environment: staging
+
+# -- Common staging environment variables
+# env:
+#   - name: LOG_LEVEL
+#     value: "info"

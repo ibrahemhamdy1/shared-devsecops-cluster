@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # RBAC Policy Rules
+  # Format: p, <role>, <resource>, <action>, <object>, <effect>
+  # Roles: role:devops-admin, role:developer, role:readonly
+  policy.csv: |
+    # DevOps Admin Role - Full Access
+    p, role:devops-admin, applications, *, */*, allow
+    p, role:devops-admin, clusters, *, *, allow
+    p, role:devops-admin, repositories, *, *, allow
+    p, role:devops-admin, projects, *, *, allow
+    p, role:devops-admin, logs, *, *, allow
+    p, role:devops-admin, exec, *, */*, allow
+    p, role:devops-admin, accounts, *, *, allow
+    
+    # Developer Role - Read + Sync on non-prod
+    p, role:developer, applications, get, */*, allow
+    p, role:developer, applications, sync, dev/*, allow
+    p, role:developer, applications, sync, staging/*, allow
+    p, role:developer, logs, get, */*, allow
+    p, role:developer, projects, get, *, allow
+    
+    # User to Role Mappings
+    # Map 'devops' account to devops-admin role
+    g, devops, role:devops-admin
+    
+    # Map 'developer' account to developer role
+    g, developer, role:developer
+  
+  # Default policy for unauthenticated users
+  policy.default: role:readonly
+  
+  # RBAC scopes - enable group-based RBAC
+  scopes: '[groups]'

@@ -1,0 +1,48 @@
+# =============================================================================
+# App of Apps - Bootstrap Pattern
+# =============================================================================
+# This is the root ArgoCD Application that manages all other applications.
+# Apply this once to bootstrap the entire GitOps deployment pipeline.
+#
+# Usage:
+#   kubectl apply -f gitops/bootstrap/app-of-apps.yaml
+#
+# This application watches the gitops/bootstrap/applications/ directory
+# and automatically creates/manages all child applications.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: bootstrap
+    app.kubernetes.io/managed-by: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+
+  source:
+    # -- Replace with your actual GitOps repository URL
+    repoURL: https://github.com/ORG/shared-devsecops-gitops.git
+    targetRevision: main
+    path: gitops/bootstrap/applications
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

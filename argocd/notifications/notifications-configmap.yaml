@@ -1,0 +1,343 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-notifications-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Notification Templates
+  template.app-sync-succeeded: |
+    message: |
+      Application {{.app.metadata.name}} sync is {{.app.status.operationState.phase}}.
+      {{if eq .app.status.operationState.phase "Succeeded"}}✓{{end}}
+    slack:
+      attachments: |
+        [{
+          "color": "#18be52",
+          "fields": [
+            {
+              "title": "Sync Status",
+              "value": "Succeeded",
+              "short": true
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            },
+            {
+              "title": "Revision",
+              "value": "{{.app.status.sync.revision}}",
+              "short": true
+            },
+            {
+              "title": "Author",
+              "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
+              "short": true
+            }
+          ],
+          "title": "{{.app.metadata.name}}",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "footer": "ArgoCD"
+        }]
+      deliveryPolicy: Post
+      groupingKey: "{{.app.metadata.name}}"
+      notifyBroadcast: false
+    teams:
+      themeColor: "#18be52"
+      facts: |
+        [
+          {
+            "name": "Sync Status",
+            "value": "Succeeded"
+          },
+          {
+            "name": "Repository",
+            "value": "{{.app.spec.source.repoURL}}"
+          },
+          {
+            "name": "Revision",
+            "value": "{{.app.status.sync.revision}}"
+          },
+          {
+            "name": "Author",
+            "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}"
+          }
+        ]
+      potentialAction: |
+        [
+          {
+            "@type": "OpenUri",
+            "name": "Sync Details",
+            "targets": [
+              {
+                "os": "default",
+                "uri": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+              }
+            ]
+          }
+        ]
+      title: "{{.app.metadata.name}} Sync Succeeded"
+
+  template.app-sync-failed: |
+    message: |
+      Application {{.app.metadata.name}} sync is {{.app.status.operationState.phase}}.
+      {{if eq .app.status.operationState.phase "Failed"}}✗{{end}}
+    slack:
+      attachments: |
+        [{
+          "color": "#e96d76",
+          "fields": [
+            {
+              "title": "Sync Status",
+              "value": "Failed",
+              "short": true
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            },
+            {
+              "title": "Revision",
+              "value": "{{.app.status.sync.revision}}",
+              "short": true
+            },
+            {
+              "title": "Author",
+              "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
+              "short": true
+            },
+            {
+              "title": "Error",
+              "value": "{{.app.status.operationState.syncResult.errors}}",
+              "short": false
+            }
+          ],
+          "title": "{{.app.metadata.name}}",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "footer": "ArgoCD"
+        }]
+      deliveryPolicy: Post
+      groupingKey: "{{.app.metadata.name}}"
+      notifyBroadcast: false
+    teams:
+      themeColor: "#e96d76"
+      facts: |
+        [
+          {
+            "name": "Sync Status",
+            "value": "Failed"
+          },
+          {
+            "name": "Repository",
+            "value": "{{.app.spec.source.repoURL}}"
+          },
+          {
+            "name": "Revision",
+            "value": "{{.app.status.sync.revision}}"
+          },
+          {
+            "name": "Author",
+            "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}"
+          },
+          {
+            "name": "Error",
+            "value": "{{.app.status.operationState.syncResult.errors}}"
+          }
+        ]
+      potentialAction: |
+        [
+          {
+            "@type": "OpenUri",
+            "name": "Sync Details",
+            "targets": [
+              {
+                "os": "default",
+                "uri": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+              }
+            ]
+          }
+        ]
+      title: "{{.app.metadata.name}} Sync Failed"
+
+  template.app-health-degraded: |
+    message: |
+      Application {{.app.metadata.name}} health is {{.app.status.health.status}}.
+      {{if eq .app.status.health.status "Degraded"}}⚠{{end}}
+    slack:
+      attachments: |
+        [{
+          "color": "#f4c030",
+          "fields": [
+            {
+              "title": "Health Status",
+              "value": "{{.app.status.health.status}}",
+              "short": true
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            },
+            {
+              "title": "Revision",
+              "value": "{{.app.status.sync.revision}}",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "{{.app.spec.project}}",
+              "short": true
+            }
+          ],
+          "title": "{{.app.metadata.name}}",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "footer": "ArgoCD"
+        }]
+      deliveryPolicy: Post
+      groupingKey: "{{.app.metadata.name}}"
+      notifyBroadcast: false
+    teams:
+      themeColor: "#f4c030"
+      facts: |
+        [
+          {
+            "name": "Health Status",
+            "value": "{{.app.status.health.status}}"
+          },
+          {
+            "name": "Repository",
+            "value": "{{.app.spec.source.repoURL}}"
+          },
+          {
+            "name": "Revision",
+            "value": "{{.app.status.sync.revision}}"
+          },
+          {
+            "name": "Project",
+            "value": "{{.app.spec.project}}"
+          }
+        ]
+      potentialAction: |
+        [
+          {
+            "@type": "OpenUri",
+            "name": "Health Details",
+            "targets": [
+              {
+                "os": "default",
+                "uri": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+              }
+            ]
+          }
+        ]
+      title: "{{.app.metadata.name}} Health Degraded"
+
+  template.app-sync-running: |
+    message: |
+      Application {{.app.metadata.name}} sync is {{.app.status.operationState.phase}}.
+      {{if eq .app.status.operationState.phase "Running"}}⟳{{end}}
+    slack:
+      attachments: |
+        [{
+          "color": "#0099ff",
+          "fields": [
+            {
+              "title": "Sync Status",
+              "value": "Running",
+              "short": true
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            },
+            {
+              "title": "Revision",
+              "value": "{{.app.status.sync.revision}}",
+              "short": true
+            },
+            {
+              "title": "Author",
+              "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
+              "short": true
+            }
+          ],
+          "title": "{{.app.metadata.name}}",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "footer": "ArgoCD"
+        }]
+      deliveryPolicy: Post
+      groupingKey: "{{.app.metadata.name}}"
+      notifyBroadcast: false
+    teams:
+      themeColor: "#0099ff"
+      facts: |
+        [
+          {
+            "name": "Sync Status",
+            "value": "Running"
+          },
+          {
+            "name": "Repository",
+            "value": "{{.app.spec.source.repoURL}}"
+          },
+          {
+            "name": "Revision",
+            "value": "{{.app.status.sync.revision}}"
+          },
+          {
+            "name": "Author",
+            "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}"
+          }
+        ]
+      potentialAction: |
+        [
+          {
+            "@type": "OpenUri",
+            "name": "Sync Details",
+            "targets": [
+              {
+                "os": "default",
+                "uri": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+              }
+            ]
+          }
+        ]
+      title: "{{.app.metadata.name}} Sync Running"
+
+  # Notification Triggers
+  trigger.on-sync-succeeded: |
+    - when: app.status.operationState.phase in ['Succeeded'] and app.status.operationState.finishedAt != ''
+      oncePer: app.status.operationState.finishedAt
+      send: [app-sync-succeeded]
+
+  trigger.on-sync-failed: |
+    - when: app.status.operationState.phase in ['Error', 'Failed']
+      oncePer: app.status.operationState.finishedAt
+      send: [app-sync-failed]
+
+  trigger.on-health-degraded: |
+    - when: app.status.health.status == 'Degraded'
+      oncePer: 5m
+      send: [app-health-degraded]
+
+  trigger.on-sync-running: |
+    - when: app.status.operationState.phase in ['Running']
+      oncePer: 5m
+      send: [app-sync-running]
+
+  # Service Configuration - Slack
+  service.slack: |
+    token: $slack-token
+
+  # Service Configuration - Microsoft Teams
+  service.teams: |
+    webhookUrl: $teams-webhook-url
+
+  # Context configuration
+  context: |
+    argocdUrl: https://argocd.internal.example.com

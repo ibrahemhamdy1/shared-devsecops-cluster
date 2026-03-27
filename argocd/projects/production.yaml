@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: production
+  namespace: argocd
+spec:
+  description: Production environment project with restricted sync windows
+  
+  # Source repositories - organization GitOps repository
+  sourceRepos:
+    - 'https://github.com/ORG/shared-devsecops-gitops.git'
+    - 'https://github.com/ORG/shared-devsecops-gitops'
+  
+  # Destinations - only prod-* namespaces
+  destinations:
+    - namespace: 'prod-*'
+      server: 'https://kubernetes.default.svc'
+  
+  # Cluster resource blacklist - prevent namespace creation
+  clusterResourceBlacklist:
+    - group: ''
+      kind: Namespace
+  
+  # Namespace resource blacklist - prevent quota and limit modifications
+  namespaceResourceBlacklist:
+    - group: ''
+      kind: ResourceQuota
+    - group: ''
+      kind: LimitRange
+  
+  # Sync windows - allow sync only during business hours Mon-Fri 09:00-17:00 UTC
+  syncWindows:
+    - kind: allow
+      schedule: '0 9 * * Mon-Fri'
+      duration: 8h
+      timeZone: UTC
+      applications:
+        - '*'
+  
+  # Roles for RBAC
+  roles:
+    # Production deployer - can sync applications
+    - name: prod-deployer
+      description: Production deployer with sync permissions on production project
+      policies:
+        - p, proj:production:prod-deployer, applications, get, prod/*, allow
+        - p, proj:production:prod-deployer, applications, sync, prod/*, allow
+        - p, proj:production:prod-deployer, repositories, get, *, allow
+      groups:
+        - prod-deployers
+    
+    # Production viewer - read-only access
+    - name: prod-viewer
+      description: Production viewer with read-only access to production project
+      policies:
+        - p, proj:production:prod-viewer, applications, get, prod/*, allow
+        - p, proj:production:prod-viewer, repositories, get, *, allow
+      groups:
+        - prod-viewers

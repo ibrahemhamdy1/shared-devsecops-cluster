@@ -1,0 +1,48 @@
+# =============================================================================
+# Sample App - Dev Environment ArgoCD Application
+# =============================================================================
+# Managed by the app-of-apps bootstrap pattern.
+# Sync Policy: Automated with prune and self-heal
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sample-app-dev
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: sample-app
+    environment: dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: dev
+
+  source:
+    # -- Replace with your actual GitOps repository URL
+    repoURL: https://github.com/ORG/shared-devsecops-gitops.git
+    targetRevision: main
+    path: gitops/charts/base-app
+    helm:
+      valueFiles:
+        - ../../environments/dev/values-common.yaml
+        - ../../apps/dev/sample-app/values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev-sample-app
+
+  # -- Dev: Fully automated sync with self-healing
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

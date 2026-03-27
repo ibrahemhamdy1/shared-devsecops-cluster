@@ -1,0 +1,282 @@
+# ArgoCD Helm Values - Enterprise Deployment on EKS 1.35
+# Single cluster setup with HA disabled (can be enabled later)
+# TLS terminated at ALB, server runs with --insecure flag
+
+global:
+  domain: argocd.internal.example.com
+  imagePullPolicy: IfNotPresent
+
+# ArgoCD Server Configuration
+server:
+  enabled: true
+  replicas: 1
+  
+  # Service configuration - ClusterIP for ALB ingress
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  
+  # Ingress configuration with AWS ALB annotations
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/certificate-arn: "${ACM_CERTIFICATE_ARN}"
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/healthcheck-path: /healthz
+      alb.ingress.kubernetes.io/group.name: platform-internal
+    hosts:
+      - argocd.internal.example.com
+    paths:
+      - path: /
+        pathType: Prefix
+    tls: []  # TLS handled by ALB
+
+  # Server extra arguments - insecure flag for ALB termination
+  extraArgs:
+    - --insecure
+
+  # Resource requests and limits for tools nodes (t3.large)
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Node selector for tools nodes
+  nodeSelector:
+    role: tools
+
+  # Tolerations for tools nodes
+  tolerations:
+    - key: role
+      operator: Equal
+      value: tools
+      effect: NoSchedule
+
+  # Metrics for Prometheus scraping
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false  # Enable if using Prometheus Operator
+
+# ArgoCD Repo Server Configuration
+repoServer:
+  enabled: true
+  replicas: 1
+
+  # Resource requests and limits
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  # Node selector for tools nodes
+  nodeSelector:
+    role: tools
+
+  # Tolerations for tools nodes
+  tolerations:
+    - key: role
+      operator: Equal
+      value: tools
+      effect: NoSchedule
+
+  # Metrics for Prometheus scraping
+  metrics:
+    enabled: true
+
+# ArgoCD Application Controller Configuration
+controller:
+  enabled: true
+  replicas: 1
+
+  # Resource requests and limits
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  # Node selector for tools nodes
+  nodeSelector:
+    role: tools
+
+  # Tolerations for tools nodes
+  tolerations:
+    - key: role
+      operator: Equal
+      value: tools
+      effect: NoSchedule
+
+  # Metrics for Prometheus scraping
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false  # Enable if using Prometheus Operator
+
+# Redis Configuration
+redis:
+  enabled: true
+  replicas: 1
+
+  # Resource requests and limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+  # Node selector for tools nodes
+  nodeSelector:
+    role: tools
+
+  # Tolerations for tools nodes
+  tolerations:
+    - key: role
+      operator: Equal
+      value: tools
+      effect: NoSchedule
+
+# ApplicationSet Controller Configuration
+applicationSet:
+  enabled: true
+  replicas: 1
+
+  # Node selector for tools nodes
+  nodeSelector:
+    role: tools
+
+  # Tolerations for tools nodes
+  tolerations:
+    - key: role
+      operator: Equal
+      value: tools
+      effect: NoSchedule
+
+# Notifications Controller Configuration
+notifications:
+  enabled: true
+  replicas: 1
+
+  # Node selector for tools nodes
+  nodeSelector:
+    role: tools
+
+  # Tolerations for tools nodes
+  tolerations:
+    - key: role
+      operator: Equal
+      value: tools
+      effect: NoSchedule
+
+# Dex Configuration - Disabled (using built-in accounts)
+dex:
+  enabled: false
+
+# ArgoCD Configuration
+configs:
+  # RBAC Configuration
+  rbac:
+    # Default policy - read-only access
+    policy.default: role:readonly
+    # Enable group-based RBAC
+    scopes: '[groups]'
+
+  # Repository Configuration
+  repositories:
+    # Placeholder for organization GitOps repository
+    # Uncomment and configure with actual repository details
+    # - url: https://github.com/ORG/shared-devsecops-gitops.git
+    #   name: shared-devsecops-gitops
+    #   type: git
+    #   passwordSecret:
+    #     name: argocd-repo-creds
+    #     key: password
+    #   usernameSecret:
+    #     name: argocd-repo-creds
+    #     key: username
+
+  # Accounts Configuration
+  accounts:
+    # Admin account - full access
+    admin:
+      enabled: true
+      password: null  # Will be auto-generated, retrieve with: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+    
+    # DevOps account - API key enabled
+    devops:
+      enabled: true
+      capabilities: login,apiKey
+    
+    # Developer account - login only
+    developer:
+      enabled: true
+      capabilities: login
+
+  # Resource tracking via annotation
+  application:
+    resourceTrackingMethod: annotation
+
+  # Server configuration
+  server:
+    # Disable TLS (handled by ALB)
+    insecure: true
+    # Disable HTTPS redirect
+    insecureSkipVerify: false
+
+  # URL configuration
+  url: https://argocd.internal.example.com
+
+# Image configuration
+# Note: The chart will use its default appVersion (v3.3.6) unless overridden here.
+# Only set this if you need to pin a specific ArgoCD version.
+# image:
+#   repository: quay.io/argoproj/argocd
+#   tag: v3.3.6
+#   imagePullPolicy: IfNotPresent
+
+# RBAC Configuration
+rbac:
+  create: true
+
+# Service Account Configuration
+serviceAccount:
+  create: true
+  name: argocd-application-controller
+
+# Pod Security Policy
+podSecurityPolicy:
+  enabled: false  # Use Pod Security Standards instead
+
+# Network Policy
+networkPolicy:
+  enabled: false  # Enable if network policies are required
+
+# Persistence
+persistence:
+  enabled: false  # Not needed for single cluster setup
+
+# HA Configuration - Disabled for now
+ha:
+  enabled: false
+
+# Metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false  # Enable if using Prometheus Operator

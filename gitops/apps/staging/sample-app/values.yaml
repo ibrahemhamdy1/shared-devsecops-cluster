@@ -1,0 +1,49 @@
+# =============================================================================
+# Sample Application - Staging Environment Values
+# =============================================================================
+# Layer 3: App-specific overrides for staging
+# Merge order: chart defaults → staging common → this file
+# =============================================================================
+
+image:
+  # -- Replace ACCOUNT_ID with your AWS account ID
+  repository: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/sample-app
+  # -- ALWAYS pin image tags in staging (no "latest")
+  tag: "v1.0.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+# -- Ingress for staging sample app
+ingress:
+  enabled: true
+  className: alb
+  hosts:
+    - host: sample-app.staging.internal.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+# -- Staging environment variables
+env:
+  - name: LOG_LEVEL
+    value: "info"
+  - name: ENVIRONMENT
+    value: "staging"
+  - name: ENABLE_DEBUG_ENDPOINTS
+    value: "false"
+
+# -- Staging-specific config
+configMap:
+  enabled: true
+  data:
+    app.conf: |
+      environment=staging
+      debug=false
+      log_format=json
+
+# -- ServiceAccount (for Pod Identity / IRSA)
+serviceAccount:
+  create: true
+  annotations: {}
+  # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/sample-app-staging

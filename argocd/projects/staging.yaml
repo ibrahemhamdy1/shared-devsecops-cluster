@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: staging
+  namespace: argocd
+spec:
+  description: Staging environment project
+  
+  # Source repositories - organization GitOps repository
+  sourceRepos:
+    - 'https://github.com/ORG/shared-devsecops-gitops.git'
+    - 'https://github.com/ORG/shared-devsecops-gitops'
+  
+  # Destinations - only staging-* namespaces
+  destinations:
+    - namespace: 'staging-*'
+      server: 'https://kubernetes.default.svc'
+  
+  # Cluster resource blacklist - prevent namespace creation
+  clusterResourceBlacklist:
+    - group: ''
+      kind: Namespace
+  
+  # Namespace resource blacklist - prevent quota and limit modifications
+  namespaceResourceBlacklist:
+    - group: ''
+      kind: ResourceQuota
+    - group: ''
+      kind: LimitRange
+  
+  # Roles for RBAC
+  roles:
+    - name: staging-deployer
+      description: Staging deployer with sync permissions on staging project
+      policies:
+        - p, proj:staging:staging-deployer, applications, get, staging/*, allow
+        - p, proj:staging:staging-deployer, applications, sync, staging/*, allow
+        - p, proj:staging:staging-deployer, applications, delete, staging/*, allow
+        - p, proj:staging:staging-deployer, repositories, get, *, allow
+      groups:
+        - staging-team

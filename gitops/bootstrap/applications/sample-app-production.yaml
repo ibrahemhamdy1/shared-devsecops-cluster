@@ -1,0 +1,48 @@
+# =============================================================================
+# Sample App - Production Environment ArgoCD Application
+# =============================================================================
+# Managed by the app-of-apps bootstrap pattern.
+# Sync Policy: MANUAL - requires explicit sync trigger
+# Sync Window: Mon-Fri 09:00-17:00 UTC (enforced by production project)
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sample-app-production
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: sample-app
+    environment: production
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: production
+
+  source:
+    # -- Replace with your actual GitOps repository URL
+    repoURL: https://github.com/ORG/shared-devsecops-gitops.git
+    targetRevision: main
+    path: gitops/charts/base-app
+    helm:
+      valueFiles:
+        - ../../environments/production/values-common.yaml
+        - ../../apps/production/sample-app/values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod-sample-app
+
+  # -- Production: MANUAL sync only (no automated block)
+  # Self-heal is DISABLED - drift triggers alerts, not auto-remediation
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PruneLast=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m

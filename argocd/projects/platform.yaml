@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Platform infrastructure tools and shared services
+  
+  # Source repositories - allow organization GitOps repository
+  sourceRepos:
+    - 'https://github.com/ORG/shared-devsecops-gitops.git'
+    - 'https://github.com/ORG/shared-devsecops-gitops'  # Alternative format
+  
+  # Destinations - platform infrastructure namespaces and cluster-wide resources
+  destinations:
+    # ArgoCD namespace
+    - namespace: 'argocd'
+      server: 'https://kubernetes.default.svc'
+    
+    # Monitoring namespace
+    - namespace: 'monitoring'
+      server: 'https://kubernetes.default.svc'
+    
+    # Ingress controller namespace
+    - namespace: 'ingress-nginx'
+      server: 'https://kubernetes.default.svc'
+    
+    # Certificate management namespace
+    - namespace: 'cert-manager'
+      server: 'https://kubernetes.default.svc'
+    
+    # Kube system namespace (for cluster-wide components)
+    - namespace: 'kube-system'
+      server: 'https://kubernetes.default.svc'
+  
+  # Cluster resource whitelist - allow all cluster-scoped resources
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  # Namespace resource whitelist - allow all namespace-scoped resources
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  # Roles for RBAC
+  roles:
+    - name: platform-admin
+      description: Platform administrator with full access to platform project
+      policies:
+        - p, proj:platform:platform-admin, applications, *, platform/*, allow
+        - p, proj:platform:platform-admin, repositories, *, *, allow
+        - p, proj:platform:platform-admin, clusters, *, *, allow
+      groups:
+        - platform-admins

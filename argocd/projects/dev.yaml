@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dev
+  namespace: argocd
+spec:
+  description: Development environment project
+  
+  # Source repositories - organization GitOps repository
+  sourceRepos:
+    - 'https://github.com/ORG/shared-devsecops-gitops.git'
+    - 'https://github.com/ORG/shared-devsecops-gitops'
+  
+  # Destinations - only dev-* namespaces
+  destinations:
+    - namespace: 'dev-*'
+      server: 'https://kubernetes.default.svc'
+  
+  # Cluster resource blacklist - prevent namespace creation
+  clusterResourceBlacklist:
+    - group: ''
+      kind: Namespace
+  
+  # Namespace resource blacklist - prevent quota and limit modifications
+  namespaceResourceBlacklist:
+    - group: ''
+      kind: ResourceQuota
+    - group: ''
+      kind: LimitRange
+  
+  # Roles for RBAC
+  roles:
+    - name: dev-deployer
+      description: Developer with sync permissions on dev project
+      policies:
+        - p, proj:dev:dev-deployer, applications, get, dev/*, allow
+        - p, proj:dev:dev-deployer, applications, sync, dev/*, allow
+        - p, proj:dev:dev-deployer, applications, delete, dev/*, allow
+        - p, proj:dev:dev-deployer, repositories, get, *, allow
+      groups:
+        - dev-team

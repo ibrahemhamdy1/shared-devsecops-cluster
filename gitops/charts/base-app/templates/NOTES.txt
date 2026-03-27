@@ -1,0 +1,32 @@
+===========================================================================
+  {{ include "base-app.fullname" . }} has been deployed!
+===========================================================================
+
+Application Info:
+  Name:      {{ include "base-app.fullname" . }}
+  Namespace: {{ .Release.Namespace }}
+  Replicas:  {{ .Values.replicaCount }}
+
+{{- if .Values.ingress.enabled }}
+
+Application URL(s):
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+
+To access the application, run:
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "base-app.selectorLabels" . | replace "\n" "," }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.service.targetPort }}
+
+Then visit: http://localhost:8080
+{{- end }}
+
+Check deployment status:
+  kubectl rollout status deployment/{{ include "base-app.fullname" . }} --namespace {{ .Release.Namespace }}
+
+View application logs:
+  kubectl logs -f deployment/{{ include "base-app.fullname" . }} --namespace {{ .Release.Namespace }}
+
+Get running pods:
+  kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "base-app.selectorLabels" . | replace "\n" "," }}"

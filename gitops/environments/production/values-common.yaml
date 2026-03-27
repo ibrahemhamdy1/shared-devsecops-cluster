@@ -1,0 +1,62 @@
+# =============================================================================
+# Production Environment - Common Values
+# =============================================================================
+# These values apply to ALL applications deployed in the production environment.
+# App-specific overrides go in gitops/apps/production/{app-name}/values.yaml
+# =============================================================================
+
+# -- Production replicas (minimum 3 for HA across AZs)
+replicaCount: 3
+
+# -- Production-grade resources
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# -- Autoscaling enabled for production
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# -- PDB enabled for production (ensures availability during rollouts)
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# -- Ingress defaults for production environment
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/group.name: prod-apps
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+
+# -- Pod anti-affinity to spread across AZs
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - "{{ .Release.Name }}"
+          topologyKey: topology.kubernetes.io/zone
+
+# -- Common production environment variables
+# env:
+#   - name: LOG_LEVEL
+#     value: "warn"

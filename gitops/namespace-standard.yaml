@@ -1,0 +1,91 @@
+# =============================================================================
+# Namespace-per-Application Standard
+# =============================================================================
+# Convention: Each application gets its own namespace per environment.
+#
+# Naming Pattern: {environment}-{app-name}
+#
+# Examples:
+#   dev-sample-app
+#   staging-sample-app
+#   prod-sample-app
+#   dev-api-gateway
+#   staging-api-gateway
+#   prod-api-gateway
+#
+# Namespaces are automatically created by ArgoCD when syncOptions
+# includes CreateNamespace=true. This file serves as documentation
+# and a template for manual namespace creation if needed.
+# =============================================================================
+
+# --- Development namespace example ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-sample-app
+  labels:
+    app.kubernetes.io/name: sample-app
+    app.kubernetes.io/part-of: sample-app
+    environment: dev
+    managed-by: argocd
+  annotations:
+    argocd.argoproj.io/managed-by: argocd
+    description: "Development environment for sample-app"
+---
+# --- Staging namespace example ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging-sample-app
+  labels:
+    app.kubernetes.io/name: sample-app
+    app.kubernetes.io/part-of: sample-app
+    environment: staging
+    managed-by: argocd
+  annotations:
+    argocd.argoproj.io/managed-by: argocd
+    description: "Staging environment for sample-app"
+---
+# --- Production namespace example ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-sample-app
+  labels:
+    app.kubernetes.io/name: sample-app
+    app.kubernetes.io/part-of: sample-app
+    environment: production
+    managed-by: argocd
+  annotations:
+    argocd.argoproj.io/managed-by: argocd
+    description: "Production environment for sample-app"
+
+# =============================================================================
+# Namespace Standards:
+#
+# 1. NAMING:
+#    - Pattern: {env}-{app-name}
+#    - Environments: dev, staging, prod
+#    - App names: lowercase, hyphens only (e.g., my-api, web-frontend)
+#
+# 2. LABELS (required):
+#    - app.kubernetes.io/name: Application name
+#    - app.kubernetes.io/part-of: Application group
+#    - environment: Environment name
+#    - managed-by: argocd
+#
+# 3. RESOURCE QUOTAS (applied separately per environment):
+#    - Dev: 2 CPU, 2Gi memory
+#    - Staging: 4 CPU, 4Gi memory
+#    - Production: 8 CPU, 8Gi memory
+#
+# 4. NETWORK POLICIES:
+#    - Default deny all ingress/egress
+#    - Explicit allow rules per application
+#    - Cross-namespace communication requires explicit policy
+#
+# 5. RBAC:
+#    - Developers: edit access in dev namespaces, view in staging/prod
+#    - DevOps: admin access in all namespaces
+#    - ArgoCD service account: full access for reconciliation
+# =============================================================================
