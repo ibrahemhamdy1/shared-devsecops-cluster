@@ -1,0 +1,13 @@
+Read all terraform module files and return their complete contents. Read every .tf file in each of these directories:
+
+1. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/ecr/ (main.tf, outputs.tf, variables.tf)
+2. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/eks/ (main.tf, outputs.tf, variables.tf)
+3. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/eks-addons/ (main.tf, outputs.tf, variables.tf)
+4. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/iam-baseline/ (main.tf, outputs.tf, variables.tf)
+5. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/kms/ (main.tf, outputs.tf, variables.tf)
+6. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/route53/ (main.tf, outputs.tf, variables.tf)
+7. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/security-groups/ (main.tf, outputs.tf, variables.tf)
+8. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/modules/vpc/ (main.tf, outputs.tf, variables.tf)
+9. /Users/ibrahimhamdyramadan/Code/shared-devsecops/terraform/environments/shared-devsecops/outputs.tf
+
+For each file, output the FULL file path and FULL file contents. Do not summarize or skip any content.

@@ -1,0 +1,56 @@
+2026-03-26T23:34:57.245+0200 [INFO]  Terraform version: 1.14.8
+2026-03-26T23:34:57.245+0200 [DEBUG] using github.com/hashicorp/go-tfe v1.94.0
+2026-03-26T23:34:57.245+0200 [DEBUG] using github.com/hashicorp/hcl/v2 v2.24.0
+2026-03-26T23:34:57.245+0200 [DEBUG] using github.com/hashicorp/terraform-svchost v0.1.1
+2026-03-26T23:34:57.245+0200 [DEBUG] using github.com/zclconf/go-cty v1.16.3
+2026-03-26T23:34:57.245+0200 [INFO]  Go runtime version: go1.25.8
+2026-03-26T23:34:57.245+0200 [INFO]  CLI args: []string{"terraform", "plan"}
+2026-03-26T23:34:57.245+0200 [TRACE] Stdout is a terminal of width 80
+2026-03-26T23:34:57.245+0200 [TRACE] Stderr is not a terminal
+2026-03-26T23:34:57.245+0200 [TRACE] Stdin is a terminal
+2026-03-26T23:34:57.245+0200 [DEBUG] Attempting to open CLI config file: /Users/ibrahimhamdyramadan/.terraformrc
+2026-03-26T23:34:57.245+0200 [DEBUG] File doesn't exist, but doesn't need to. Ignoring.
+2026-03-26T23:34:57.245+0200 [DEBUG] ignoring non-existing provider search directory terraform.d/plugins
+2026-03-26T23:34:57.245+0200 [DEBUG] ignoring non-existing provider search directory /Users/ibrahimhamdyramadan/.terraform.d/plugins
+2026-03-26T23:34:57.245+0200 [DEBUG] ignoring non-existing provider search directory /Users/ibrahimhamdyramadan/Library/Application Support/io.terraform/plugins
+2026-03-26T23:34:57.245+0200 [DEBUG] ignoring non-existing provider search directory /Library/Application Support/io.terraform/plugins
+2026-03-26T23:34:57.247+0200 [INFO]  CLI command args: []string{"plan"}
+2026-03-26T23:34:57.250+0200 [TRACE] Meta.Backend: no config given or present on disk, so returning nil config
+2026-03-26T23:34:57.250+0200 [TRACE] Meta.Backend: backend has not previously been initialized in this working directory
+2026-03-26T23:34:57.250+0200 [TRACE] Meta.Backend: using default local state only (no backend configuration, and no existing initialized backend)
+2026-03-26T23:34:57.250+0200 [TRACE] Meta.Backend: instantiated backend of type <nil>
+2026-03-26T23:34:57.250+0200 [TRACE] providercache.fillMetaCache: scanning directory .terraform/providers
+2026-03-26T23:34:57.251+0200 [TRACE] getproviders.SearchLocalDirectory: found registry.terraform.io/hashicorp/aws v6.38.0 for darwin_amd64 at .terraform/providers/registry.terraform.io/hashicorp/aws/6.38.0/darwin_amd64
+2026-03-26T23:34:57.251+0200 [TRACE] providercache.fillMetaCache: including .terraform/providers/registry.terraform.io/hashicorp/aws/6.38.0/darwin_amd64 as a candidate package for registry.terraform.io/hashicorp/aws 6.38.0
+2026-03-26T23:35:02.370+0200 [DEBUG] checking for provisioner in "."
+2026-03-26T23:35:02.371+0200 [DEBUG] checking for provisioner in "/usr/local/bin"
+2026-03-26T23:35:02.372+0200 [TRACE] Meta.Backend: backend <nil> does not support operations, so wrapping it in a local backend
+2026-03-26T23:35:02.379+0200 [INFO]  backend/local: starting Plan operation
+2026-03-26T23:35:02.381+0200 [TRACE] backend/local: requesting state manager for workspace "default"
+2026-03-26T23:35:02.381+0200 [TRACE] backend/local: state manager for workspace "default" will:
+ - read initial snapshot from terraform.tfstate
+ - write new snapshots to terraform.tfstate
+ - create any backup at terraform.tfstate.backup
+2026-03-26T23:35:02.381+0200 [TRACE] backend/local: requesting state lock for workspace "default"
+2026-03-26T23:35:02.381+0200 [TRACE] statemgr.Filesystem: preparing to manage state snapshots at terraform.tfstate
+2026-03-26T23:35:02.382+0200 [TRACE] statemgr.Filesystem: no previously-stored snapshot exists
+2026-03-26T23:35:02.382+0200 [TRACE] statemgr.Filesystem: locking terraform.tfstate using fcntl flock
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError acquiring the state lock[0m
+[31m│[0m [0m
+[31m│[0m [0m[0mError message: resource temporarily unavailable
+[31m│[0m [0mLock Info:
+[31m│[0m [0m  ID:        fa82b8c2-0f8c-1d78-3bff-856b5e430070
+[31m│[0m [0m  Path:      terraform.tfstate
+[31m│[0m [0m  Operation: OperationTypePlan
+[31m│[0m [0m  Who:       ibrahimhamdyramadan@ibrahims-MacBook-Pro.local
+[31m│[0m [0m  Version:   1.14.8
+[31m│[0m [0m  Created:   2026-03-26 21:21:01.632243 +0000 UTC
+[31m│[0m [0m  Info:      
+[31m│[0m [0m
+[31m│[0m [0m
+[31m│[0m [0mTerraform acquires a state lock to protect the state from being written
+[31m│[0m [0mby multiple users at the same time. Please resolve the issue above and try
+[31m│[0m [0magain. For most commands, you can disable locking with the "-lock=false"
+[31m│[0m [0mflag, but this is not recommended.
+[31m╵[0m[0m

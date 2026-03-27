@@ -1,0 +1,28 @@
+2026-03-26T23:39:44.285+0200 [INFO]  Terraform version: 1.14.8
+2026-03-26T23:39:44.285+0200 [DEBUG] using github.com/hashicorp/go-tfe v1.94.0
+2026-03-26T23:39:44.285+0200 [DEBUG] using github.com/hashicorp/hcl/v2 v2.24.0
+2026-03-26T23:39:44.285+0200 [DEBUG] using github.com/hashicorp/terraform-svchost v0.1.1
+2026-03-26T23:39:44.285+0200 [DEBUG] using github.com/zclconf/go-cty v1.16.3
+2026-03-26T23:39:44.285+0200 [INFO]  Go runtime version: go1.25.8
+2026-03-26T23:39:44.285+0200 [INFO]  CLI args: []string{"terraform", "plan"}
+2026-03-26T23:39:44.285+0200 [DEBUG] Attempting to open CLI config file: /Users/ibrahimhamdyramadan/.terraformrc
+2026-03-26T23:39:44.285+0200 [DEBUG] File doesn't exist, but doesn't need to. Ignoring.
+2026-03-26T23:39:44.285+0200 [DEBUG] ignoring non-existing provider search directory terraform.d/plugins
+2026-03-26T23:39:44.285+0200 [DEBUG] ignoring non-existing provider search directory /Users/ibrahimhamdyramadan/.terraform.d/plugins
+2026-03-26T23:39:44.285+0200 [DEBUG] ignoring non-existing provider search directory /Users/ibrahimhamdyramadan/Library/Application Support/io.terraform/plugins
+2026-03-26T23:39:44.285+0200 [DEBUG] ignoring non-existing provider search directory /Library/Application Support/io.terraform/plugins
+2026-03-26T23:39:44.287+0200 [INFO]  CLI command args: []string{"plan"}
+2026-03-26T23:39:44.289+0200 [DEBUG] checking for provisioner in "."
+2026-03-26T23:39:44.290+0200 [DEBUG] checking for provisioner in "/usr/local/bin"
+2026-03-26T23:39:44.290+0200 [INFO]  backend/local: starting Plan operation
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError acquiring the state lock[0m
+[31m│[0m [0m
+[31m│[0m [0m[0mError message: resource temporarily unavailable
+[31m│[0m [0mopen .terraform.tfstate.lock.info: no such file or directory
+[31m│[0m [0m
+[31m│[0m [0mTerraform acquires a state lock to protect the state from being written
+[31m│[0m [0mby multiple users at the same time. Please resolve the issue above and try
+[31m│[0m [0magain. For most commands, you can disable locking with the "-lock=false"
+[31m│[0m [0mflag, but this is not recommended.
+[31m╵[0m[0m
